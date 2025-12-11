@@ -1,0 +1,15 @@
+{
+  "title": "Test: Node in Both Left and Right",
+  "left": {
+    "A": 10,
+    "B": 20
+  },
+  "right": {
+    "A": [
+      {"from": "B", "value": 5}
+    ],
+    "M": [
+      {"from": "A", "value": 10}
+    ]
+  }
+}
