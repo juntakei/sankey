@@ -1,0 +1,21 @@
+{
+  "title": "Example: Node Appears in Both Left and Right",
+  "left": {
+    "A": 15,
+    "B": 20,
+    "C": 10
+  },
+  "right": {
+    "A": [
+      {"from": "B", "value": 10}
+    ],
+    "M": [
+      {"from": "A", "value": 10},
+      {"from": "C", "value": 5}
+    ],
+    "N": [
+      {"from": "A", "value": 5},
+      {"from": "B", "value": 10}
+    ]
+  }
+}
