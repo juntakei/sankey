@@ -1,0 +1,16 @@
+{
+  "note": "Legacy 2-column format — parser should accept or auto-convert this into nodes/links with segments [left, right].",
+  "sources": [
+    { "id": "S1", "label": "S1", "value": 10 },
+    { "id": "S2", "label": "S2", "value": 5 }
+  ],
+  "targets": [
+    { "id": "T1", "label": "T1", "value": 8 },
+    { "id": "T2", "label": "T2", "value": 7 }
+  ],
+  "links": [
+    { "source": "S1", "target": "T1", "value": 6 },
+    { "source": "S1", "target": "T2", "value": 4 },
+    { "source": "S2", "target": "T2", "value": 5 }
+  ]
+}

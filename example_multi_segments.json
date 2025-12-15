@@ -1,0 +1,18 @@
+{
+  "segments": ["left", "center", "right"],
+  "nodes": [
+    { "id": "A", "label": "Source A", "segment": 0 },
+    { "id": "B", "label": "Source B", "segment": 0 },
+    { "id": "C", "label": "Center 1", "segment": 1 },
+    { "id": "D", "label": "Center 2", "segment": 1 },
+    { "id": "E", "label": "Right X", "segment": 2 },
+    { "id": "F", "label": "Right Y", "segment": 2 }
+  ],
+  "links": [
+    { "source": "A", "target": "C", "value": 5 },
+    { "source": "A", "target": "D", "value": 3 },
+    { "source": "B", "target": "C", "value": 2 },
+    { "source": "C", "target": "E", "value": 6 },
+    { "source": "D", "target": "F", "value": 4 }
+  ]
+}
