@@ -1,0 +1,20 @@
+{
+  "segments": ["left", "middle", "right", "far-right"],
+  "nodes": [
+    { "id": "L1", "label": "Left 1", "segment": 0 },
+    { "id": "M1", "label": "Middle 1", "segment": 1 },
+    { "id": "R1", "label": "Right 1", "segment": 2 },
+    { "id": "FR1", "label": "FarRight 1", "segment": 3 }
+  ],
+  "links": [
+    {
+      "source": "L1",
+      "target": "FR1",
+      "value": 8,
+      "label": "Long span link (L1 → FR1)"
+    },
+    { "source": "L1", "target": "M1", "value": 5 },
+    { "source": "M1", "target": "R1", "value": 3 },
+    { "source": "R1", "target": "FR1", "value": 2 }
+  ]
+}

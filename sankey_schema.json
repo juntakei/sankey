@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sankey Multi-Segment Input Schema",
+  "type": "object",
+  "required": ["nodes", "links"],
+  "properties": {
+    "segments": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Optional ordered list of segment names (columns) from left to right. If omitted, layers will be inferred."
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string", "description": "Unique node identifier" },
+          "label": { "type": "string" },
+          "segment": {
+            "oneOf": [
+              { "type": "integer", "minimum": 0 },
+              { "type": "string" }
+            ],
+            "description": "Either index into segments (0-based) or a segment name. If omitted, the layer will be inferred."
+          },
+          "value": { "type": "number", "minimum": 0, "description": "Optional node total value (used for layout sizing)" },
+          "meta": { "type": "object", "description": "Optional arbitrary metadata" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "target", "value"],
+        "properties": {
+          "source": { "type": "string", "description": "Source node id" },
+          "target": { "type": "string", "description": "Target node id" },
+          "value": { "type": "number", "minimum": 0 },
+          "label": { "type": "string" },
+          "meta": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "segmentKey": { "type": "string", "default": "segment", "description": "Key name to use when reading node segment" },
+        "ordering": { "type": "string", "enum": ["barycenter", "median", "preserve"], "default": "barycenter" },
+        "preserveOrder": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
