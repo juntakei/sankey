@@ -1,146 +1,133 @@
-# Sankey Diagram Generator
+# Sankey (multi-segment support)
 
-A Python script to generate interactive Sankey diagrams from various input formats.
+This repository implements a lightweight Sankey diagram pipeline with support for multi-segment (multi-column) layouts, long-span link splitting, and a small demo renderer that produces SVG output.
 
-## Features
+This README addition documents the new multi-segment features, usage examples, demo commands, test instructions, and suggested commit/PR text for the feature branch.
 
-- **Multiple input formats**: JSON (recommended), text files
-- **Command-line interface**: Easy to use with options
-- **Flow validation**: Automatically validates that flows match source values
-- **Interactive output**: Generates HTML files viewable in any browser
+## What I added
 
-## Installation
+- sankey_schema.json — JSON Schema for the new multi-segment input format.
+- sankey_multi.py — helper to split long-span links into adjacent-segment chains (dummy nodes).
+- sankey_pipeline.py — pipeline + layout including:
+  - layer inference (when `segments` is omitted),
+  - integration with `split_long_links`,
+  - a simple barycenter ordering,
+  - node stacking and position computation,
+  - ribbon rendering support where link width encodes value.
+- scripts/demo_render.py — simple demo runner that creates a basic SVG.
+- scripts/demo_render_color.py — colorful demo runner that:
+  - draws gradient-filled ribbons,
+  - supports `link_width_factor` to control how link widths scale relative to node heights,
+  - supports two color modes:
+    - `per_segment` (default): nodes colored by segment/column,
+    - `per_item`: each non-dummy node receives its own color from the palette.
+- Example JSON files:
+  - example_multi_segments.json
+  - example_span.json
+  - legacy_two_column_example.json
+- Unit tests:
+  - tests/test_split_long_links.py (covers splitting behavior and uniqueness)
 
-1. Create and activate a virtual environment:
-```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+## Multi-segment input format
 
-2. Install dependencies:
-```bash
-pip install plotly
-```
+The new input JSON supports:
+- `segments` (optional): ordered array of segment names (left → right).
+- `nodes`: array of objects with at least `id`. Optional `label`, `segment` (index or name), `value`.
+- `links`: array of `{ source, target, value, ... }`.
 
-## Usage
+Backward compatibility:
+- The parser accepts a legacy two-column format (`sources`, `targets`, `links`) and converts it to `nodes`/`links` with `segments = ["left","right"]`.
+- If `segments` is omitted and nodes don't provide `segment`, the pipeline attempts to infer layers from topology.
 
-### Basic Usage
+See `sankey_schema.json` for more details.
 
-```bash
-# Use default example_input.json
-python sankey_diagram.py
+## Demo usage
 
-# Specify input file
-python sankey_diagram.py -i data.json
+From the repository root (so Python can import local modules):
 
-# Specify input and output files
-python sankey_diagram.py -i data.json -o output.html
+- Basic color demo (per-segment coloring, factor 1.0):
+  PYTHONPATH=. python scripts/demo_render_color.py example_multi_segments.json demo_multi_segment_color.svg 1.0 per_segment
 
-# Use text format
-python sankey_diagram.py -i data.txt
-```
+- Per-item coloring, 50% factor:
+  PYTHONPATH=. python scripts/demo_render_color.py example_multi_segments.json demo_multi_segment_color.svg 0.5 per_item
 
-### Command-line Options
+- Run the simple demo (no color):
+  PYTHONPATH=. python scripts/demo_render.py example_multi_segments.json demo_multi_segment.svg
 
-- `-i, --input`: Input file (default: `example_input.json`)
-- `-o, --output`: Output HTML file (default: `sankey_diagram.html`)
-- `--no-validate`: Skip flow validation
-- `--no-show`: Do not open diagram in browser
+Open the generated `.svg` files in your browser to inspect the results.
 
-## Input Formats
+## `link_width_factor` (factor)
 
-### JSON Format (Recommended)
+- The optional `factor` (0..1) controls how link widths map to node heights.
+  - `factor = 1.0` — the sum of link widths per node will be approximately the node height (averaged between source/target).
+  - `factor = 0.5` — the sum will be ~50% of the node height, useful for dense graphs.
+- This is a practical compromise (each link participates in two nodes), so widths are computed using per-node scales and then averaged for consistency.
+- If you want exact equality on all nodes simultaneously, we can add a small iterative solver — ask if you'd like that.
 
-The JSON format is the most flexible and recommended approach:
+## Tests
 
-```json
-{
-  "title": "My Sankey Diagram",
-  "height": 600,
-  "font_size": 12,
-  "left": {
-    "A": 10,
-    "B": 20,
-    "C": 30
-  },
-  "right": {
-    "M": [
-      {"from": "A", "value": 5},
-      {"from": "B", "value": 5}
-    ],
-    "N": [
-      {"from": "A", "value": 5},
-      {"from": "B", "value": 10},
-      {"from": "C", "value": 20}
-    ]
-  }
-}
-```
+- Install pytest (if not already):
+  python -m pip install pytest
 
-**Advantages:**
-- Easy to generate programmatically
-- Supports metadata (title, height, font_size)
-- Easy to validate and parse
-- Works well with other tools
+- Run tests from repo root:
+  PYTHONPATH=. pytest -q
 
-**Alternative JSON format** (using arrays for left nodes):
-```json
-{
-  "left": [
-    {"name": "A", "value": 10},
-    {"name": "B", "value": 20}
-  ],
-  "right": {
-    "M": [
-      {"from": "A", "value": 5},
-      {"from": "B", "value": 5}
-    ]
-  }
-}
-```
+The tests currently cover `split_long_links` behavior.
 
-### Text Format
+## Developer notes / integration points
 
-The text format is simpler but less flexible:
+- To integrate into your existing rendering pipeline:
+  1. Parse input JSON (or validate against `sankey_schema.json`).
+  2. Call `build_internal_graph(nodes, links, segments)` (returns augmented nodes/links and layer map).
+  3. Compute `node_vals = compute_node_values(nodes, links)`.
+  4. Build `layers = group_by_layer(nodes, layer_map)`.
+  5. Compute `ordering = barycenter_ordering(layers, links, iterations=...)`.
+  6. Compute `positions, sizes = compute_positions(layers, ordering, node_vals, ...)`.
+  7. Render: either `render_svg(...)` (simple grayscale ribbons) or use the color demo to render gradient ribbons and control `link_width_factor` and color mode.
 
-```
-Left
-A=10
-B=20
-C=30
+- Dummy nodes inserted by splitting are marked with `"dummy": true`. Exclude their labels in final user-facing renderings if desired.
 
-Right
-M= 5 from A, 5 from B
-N= 5 from A, 10 from B, 20 from C
-L= 5 from B, 10 from C
-```
+## Files to review
 
-**Advantages:**
-- Human-readable
-- Easy to write manually
-- Simple format
+- sankey_schema.json
+- sankey_multi.py
+- sankey_pipeline.py
+- scripts/demo_render.py
+- scripts/demo_render_color.py
+- example_multi_segments.json
+- tests/test_split_long_links.py
 
-**Disadvantages:**
-- No metadata support
-- Less flexible for programmatic generation
+## Commit & PR suggestion
 
-## Examples
+If you want me to push these changes and open a PR, here are suggested texts:
 
-See `example_input.json` and `example_input.txt` for sample input files.
+- Commit message:
+  feat: add multi-segment schema, dummy-node splitting, pipeline, ribbon rendering and colored demo
 
-## Output
+- PR title:
+  feat: multi-segment Sankey layout + demo (dummy-node splitting, ribbon widths)
 
-The script generates an interactive HTML file that can be:
-- Opened in any web browser
-- Embedded in web pages
-- Shared with others
-- Exported to images using browser tools
+- PR description:
+  This PR adds multi-segment Sankey support:
+  - JSON schema and examples for multi-segment inputs
+  - split_long_links: splits long-span links into adjacent-segment chains (dummy nodes)
+  - pipeline: layer inference, barycenter ordering, stacking, positions
+  - ribbon rendering with link widths proportional to values and controlled by `link_width_factor`
+  - color demo with two color modes: per-segment and per-item
 
-## Validation
+  Checklist:
+  - [x] schema & examples
+  - [x] split_long_links implementation + tests
+  - [x] pipeline + basic layout
+  - [x] ribbon renderer and colorful demo
+  - [ ] iterate on crossing minimization (follow-up)
+  - [ ] optional iterative thickness solver (follow-up)
 
-By default, the script validates that:
-- All flows from left nodes match the total values
-- All referenced left nodes exist
-- No flows reference non-existent nodes
+## How I can help next
 
-Use `--no-validate` to skip validation.
+- I can commit & push the README update and all changed files to `feature/multi-segment` and open a PR with the above description.
+- Or I can produce the exact git commands you can run locally to apply and push the changes yourself.
+
+---
+
+If you'd like me to push the README and all pending changes and open the PR now, confirm and I will proceed.
