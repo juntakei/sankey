@@ -63,7 +63,9 @@ Open the generated `.svg` files in your browser to inspect the results.
   - `factor = 0.5` — the sum will be ~50% of the node height, useful for dense graphs.
 - This is a practical compromise (each link participates in two nodes), so widths are computed using per-node scales and then averaged for consistency.
 - If you want exact equality on all nodes simultaneously, we can add a small iterative solver — ask if you'd like that.
-- Legend can be displayed default. If you want not to show legend, add "false" to the command.
+
+## Legend
+- Legend will be shown by default. If you want not to show legend, add "false" to the command.
 - sample $ python scripts/demo_render_color.py example_multi_segments.json demo.svg 0.9 per_item false
 
 ## Tests
@@ -99,23 +101,6 @@ The tests currently cover `split_long_links` behavior.
 - example_multi_segments.json
 - tests/test_split_long_links.py
 
-## Commit & PR suggestion
-
-If you want me to push these changes and open a PR, here are suggested texts:
-
-- Commit message:
-  feat: add multi-segment schema, dummy-node splitting, pipeline, ribbon rendering and colored demo
-
-- PR title:
-  feat: multi-segment Sankey layout + demo (dummy-node splitting, ribbon widths)
-
-- PR description:
-  This PR adds multi-segment Sankey support:
-  - JSON schema and examples for multi-segment inputs
-  - split_long_links: splits long-span links into adjacent-segment chains (dummy nodes)
-  - pipeline: layer inference, barycenter ordering, stacking, positions
-  - ribbon rendering with link widths proportional to values and controlled by `link_width_factor`
-  - color demo with two color modes: per-segment and per-item
 
   Checklist:
   - [x] schema & examples
@@ -125,11 +110,3 @@ If you want me to push these changes and open a PR, here are suggested texts:
   - [ ] iterate on crossing minimization (follow-up)
   - [ ] optional iterative thickness solver (follow-up)
 
-## How I can help next
-
-- I can commit & push the README update and all changed files to `feature/multi-segment` and open a PR with the above description.
-- Or I can produce the exact git commands you can run locally to apply and push the changes yourself.
-
----
-
-If you'd like me to push the README and all pending changes and open the PR now, confirm and I will proceed.
