@@ -1,6 +1,7 @@
-#!/usr/bin/env python3
+"""#!/usr/bin/env python3
 """
-Colorful demo renderer for the multi-segment Sankey pipeline.
+
+"""Colorful demo renderer for the multi-segment Sankey pipeline.
 
 Usage (from repo root):
   PYTHONPATH=. python scripts/demo_render_color.py input.json out.svg [factor] [color_mode] [show_legend]
