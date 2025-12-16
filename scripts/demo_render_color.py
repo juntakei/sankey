@@ -1,7 +1,6 @@
-"""#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
-
-"""Colorful demo renderer for the multi-segment Sankey pipeline.
+Colorful demo renderer for the multi-segment Sankey pipeline.
 
 Usage (from repo root):
   PYTHONPATH=. python scripts/demo_render_color.py input.json out.svg [factor] [color_mode] [show_legend]
@@ -180,7 +179,20 @@ def render_color_svg(nodes, links, positions, sizes, layer_map,
             color = node_color.get(nid, PALETTE[0])
             svg.append(f'<rect x="{rx:.2f}" y="{ry:.2f}" width="{w:.2f}" height="{h:.2f}" rx="3" fill="{color}" stroke="#222" stroke-opacity="0.15"/>')
             label = node.get('label') or nid
-            svg.append(f'<text x="{x + w / 2 + 8:.2f}" y="{y + 4:.2f}" font-family="sans-serif" font-size="12" fill="#111">{esc(label)}</text>')
+            label_text = esc(label)
+            avg_char_w = 7.5
+            est_label_w = max(10.0, len(label_text) * avg_char_w)
+            margin = 12.0
+            right_edge = width - margin
+            label_x_right = x + w / 2 + 8.0
+            if label_x_right + est_label_w > right_edge:
+                label_x = x - w / 2 - 8.0
+                anchor = "end"
+            else:
+                label_x = label_x_right
+                anchor = "start"
+            svg.append(f'<text x="{label_x:.2f}" y="{y:.2f}" text-anchor="{anchor}" dominant-baseline="middle" font-family="sans-serif" font-size="12" fill="#111">{label_text}</text>'
+                       )
 
     # legend (optional)
     if show_legend:
