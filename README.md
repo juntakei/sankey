@@ -63,6 +63,8 @@ Open the generated `.svg` files in your browser to inspect the results.
   - `factor = 0.5` — the sum will be ~50% of the node height, useful for dense graphs.
 - This is a practical compromise (each link participates in two nodes), so widths are computed using per-node scales and then averaged for consistency.
 - If you want exact equality on all nodes simultaneously, we can add a small iterative solver — ask if you'd like that.
+- Legend can be displayed default. If you want not to show legend, add "false" to the command.
+- sample $ python scripts/demo_render_color.py example_multi_segments.json demo.svg 0.9 per_item false
 
 ## Tests
 
